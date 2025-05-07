@@ -12,6 +12,7 @@
 ALBERT_LOGGING_CATEGORY("system")
 using namespace albert;
 using namespace std;
+using namespace util;
 
 static QString defaultCommand(SupportedCommands command)
 {
@@ -249,7 +250,7 @@ QWidget* Plugin::buildConfigWidget()
 
 void Plugin::updateIndexItems()
 {
-    vector<albert::IndexItem> index_items;
+    vector<IndexItem> index_items;
     auto s = settings();
 
     for (const auto &c : commands)
