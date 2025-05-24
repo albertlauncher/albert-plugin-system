@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2024 Manuel Schneider
+// Copyright (c) 2017-2025 Manuel Schneider
 
 #include "plugin.h"
 #include "ui_configwidget.h"
@@ -10,90 +10,91 @@
 #include <albert/logging.h>
 #include <albert/standarditem.h>
 ALBERT_LOGGING_CATEGORY("system")
+using namespace Qt::StringLiterals;
+using namespace albert::util;
 using namespace albert;
 using namespace std;
-using namespace util;
 
 static QString defaultCommand(SupportedCommands command)
 {
 #if defined(Q_OS_MAC)
     switch (command) {
-        case LOCK:      return R"R(pmset displaysleepnow)R";
-        case LOGOUT:    return R"R(osascript -e 'tell app "System Events" to log out')R";
-        case SUSPEND:   return R"R(osascript -e 'tell app "System Events" to sleep')R";
-        case REBOOT:    return R"R(osascript -e 'tell app "System Events" to restart')R";
-        case POWEROFF:  return R"R(osascript -e 'tell app "System Events" to shut down')R";
+        case LOCK:      return uR"(pmset displaysleepnow)"_s;
+        case LOGOUT:    return uR"(osascript -e 'tell app "System Events" to log out')"_s;
+        case SUSPEND:   return uR"(osascript -e 'tell app "System Events" to sleep')"_s;
+        case REBOOT:    return uR"(osascript -e 'tell app "System Events" to restart')"_s;
+        case POWEROFF:  return uR"(osascript -e 'tell app "System Events" to shut down')"_s;
     }
 #elif defined(Q_OS_UNIX)
-    for (const QString &de : QString(::getenv("XDG_CURRENT_DESKTOP")).split(":")) {
+    for (const QString &de : qEnvironmentVariable("XDG_CURRENT_DESKTOP").split(u':')) {
 
-        if (de == "Unity" || de == "Pantheon" || de == "GNOME")
+        if (de == u"Unity"_s || de == u"Pantheon"_s || de == u"GNOME"_s)
             switch (command) {
-            case LOCK:      return "dbus-send --type=method_call --dest=org.gnome.ScreenSaver /org/gnome/ScreenSaver org.gnome.ScreenSaver.Lock";
-            case LOGOUT:    return "gnome-session-quit --logout --no-prompt";
+            case LOCK:      return u"dbus-send --type=method_call --dest=org.gnome.ScreenSaver /org/gnome/ScreenSaver org.gnome.ScreenSaver.Lock"_s;
+            case LOGOUT:    return u"gnome-session-quit --logout --no-prompt"_s;
             case SUSPEND:   break ;
             case HIBERNATE: break ;
-            case REBOOT:    return "gnome-session-quit --reboot --no-prompt";
-            case POWEROFF:  return "gnome-session-quit --power-off --no-prompt";
+            case REBOOT:    return u"gnome-session-quit --reboot --no-prompt"_s;
+            case POWEROFF:  return u"gnome-session-quit --power-off --no-prompt"_s;
         }
 
-        else if (de == "kde-plasma" || de == "KDE")
+        else if (de == u"kde-plasma"_s || de == u"KDE"_s)
             switch (command) {
-            case LOCK:      return "dbus-send --dest=org.freedesktop.ScreenSaver --type=method_call /ScreenSaver org.freedesktop.ScreenSaver.Lock";
-            case LOGOUT:    return "qdbus org.kde.Shutdown /Shutdown  org.kde.Shutdown.logout";
+            case LOCK:      return u"dbus-send --dest=org.freedesktop.ScreenSaver --type=method_call /ScreenSaver org.freedesktop.ScreenSaver.Lock"_s;
+            case LOGOUT:    return u"qdbus org.kde.Shutdown /Shutdown  org.kde.Shutdown.logout"_s;
             case SUSPEND:   break ;
             case HIBERNATE: break ;
-            case REBOOT:    return "qdbus org.kde.Shutdown /Shutdown  org.kde.Shutdown.logoutAndReboot";
-            case POWEROFF:  return "qdbus org.kde.Shutdown /Shutdown  org.kde.Shutdown.logoutAndShutdown";
+            case REBOOT:    return u"qdbus org.kde.Shutdown /Shutdown  org.kde.Shutdown.logoutAndReboot"_s;
+            case POWEROFF:  return u"qdbus org.kde.Shutdown /Shutdown  org.kde.Shutdown.logoutAndShutdown"_s;
         }
 
-        else if (de == "X-Cinnamon" || de == "Cinnamon")
+        else if (de == u"X-Cinnamon"_s || de == u"Cinnamon"_s)
             switch (command) {
-            case LOCK:      return "cinnamon-screensaver-command --lock";
-            case LOGOUT:    return "cinnamon-session-quit --logout";
+            case LOCK:      return u"cinnamon-screensaver-command --lock"_s;
+            case LOGOUT:    return u"cinnamon-session-quit --logout"_s;
             case SUSPEND:   break ;
             case HIBERNATE: break ;
-            case REBOOT:    return "cinnamon-session-quit --reboot";
-            case POWEROFF:  return "cinnamon-session-quit --power-off";
+            case REBOOT:    return u"cinnamon-session-quit --reboot"_s;
+            case POWEROFF:  return u"cinnamon-session-quit --power-off"_s;
         }
 
-        else if (de == "MATE")
+        else if (de == u"MATE"_s)
             switch (command) {
-            case LOCK:      return "mate-screensaver-command --lock";
-            case LOGOUT:    return "mate-session-save --logout-dialog";
-            case SUSPEND:   return "sh -c \"mate-screensaver-command --lock && systemctl suspend -i\"";
-            case HIBERNATE: return "sh -c \"mate-screensaver-command --lock && systemctl hibernate -i\"";
-            case REBOOT:    return "mate-session-save --shutdown-dialog";
-            case POWEROFF:  return "mate-session-save --shutdown-dialog";
+            case LOCK:      return u"mate-screensaver-command --lock"_s;
+            case LOGOUT:    return u"mate-session-save --logout-dialog"_s;
+            case SUSPEND:   return u"sh -c \"mate-screensaver-command --lock && systemctl suspend -i\""_s;
+            case HIBERNATE: return u"sh -c \"mate-screensaver-command --lock && systemctl hibernate -i\""_s;
+            case REBOOT:    return u"mate-session-save --shutdown-dialog"_s;
+            case POWEROFF:  return u"mate-session-save --shutdown-dialog"_s;
         }
 
-        else if (de == "XFCE")
+        else if (de == u"XFCE"_s)
             switch (command) {
-            case LOCK:      return "xflock4";
-            case LOGOUT:    return "xfce4-session-logout --logout";
-            case SUSPEND:   return "xfce4-session-logout --suspend";
-            case HIBERNATE: return "xfce4-session-logout --hibernate";
-            case REBOOT:    return "xfce4-session-logout --reboot";
-            case POWEROFF:  return "xfce4-session-logout --halt";
+            case LOCK:      return u"xflock4"_s;
+            case LOGOUT:    return u"xfce4-session-logout --logout"_s;
+            case SUSPEND:   return u"xfce4-session-logout --suspend"_s;
+            case HIBERNATE: return u"xfce4-session-logout --hibernate"_s;
+            case REBOOT:    return u"xfce4-session-logout --reboot"_s;
+            case POWEROFF:  return u"xfce4-session-logout --halt"_s;
         }
 
-        else if (de == "LXQt")
+        else if (de == u"LXQt"_s)
             switch (command) {
-            case LOCK:      return "lxqt-leave --lockscreen";
-            case LOGOUT:    return "lxqt-leave --logout";
-            case SUSPEND:   return "lxqt-leave --suspend";
-            case HIBERNATE: return "lxqt-leave --hibernate";
-            case REBOOT:    return "lxqt-leave --reboot";
-            case POWEROFF:  return "lxqt-leave --shutdown";
+            case LOCK:      return u"lxqt-leave --lockscreen"_s;
+            case LOGOUT:    return u"lxqt-leave --logout"_s;
+            case SUSPEND:   return u"lxqt-leave --suspend"_s;
+            case HIBERNATE: return u"lxqt-leave --hibernate"_s;
+            case REBOOT:    return u"lxqt-leave --reboot"_s;
+            case POWEROFF:  return u"lxqt-leave --shutdown"_s;
         }
     }
     switch (command) {
-    case LOCK:      return "xdg-screensaver lock";
-    case LOGOUT:    return "notify-send \"Error.\" \"Logout command is not set.\" --icon=system-log-out";
-    case SUSPEND:   return "systemctl suspend -i";
-    case HIBERNATE: return "systemctl hibernate -i";
-    case REBOOT:    return "notify-send \"Error.\" \"Reboot command is not set.\" --icon=system-reboot";
-    case POWEROFF:  return "notify-send \"Error.\" \"Poweroff command is not set.\" --icon=system-shutdown";
+    case LOCK:      return u"xdg-screensaver lock"_s;
+    case LOGOUT:    return u"notify-send \"Error.\" \"Logout command is not set.\" --icon=system-log-out"_s;
+    case SUSPEND:   return u"systemctl suspend -i"_s;
+    case HIBERNATE: return u"systemctl hibernate -i"_s;
+    case REBOOT:    return u"notify-send \"Error.\" \"Reboot command is not set.\" --icon=system-reboot"_s;
+    case POWEROFF:  return u"notify-send \"Error.\" \"Poweroff command is not set.\" --icon=system-shutdown"_s;
     } 
 #endif
     return {};
@@ -103,30 +104,30 @@ Plugin::Plugin():
     commands{
         {
             .id = LOCK,
-            .config_key_enabled = "lock_enabled",
-            .config_key_title = "title_lock",
-            .config_key_command = "command_lock",
-            .icon_urls = {"xdg:system-lock-screen", ":lock"},
+            .config_key_enabled = u"lock_enabled"_s,
+            .config_key_title = u"title_lock"_s,
+            .config_key_command = u"command_lock"_s,
+            .icon_urls = {u"xdg:system-lock-screen"_s, u":lock"_s},
             .default_title = tr("Lock"),
             .description = tr("Lock the session"),
             .command = defaultCommand(LOCK),
         },
         {
             .id = LOGOUT,
-            .config_key_enabled = "logout_enabled",
-            .config_key_title = "title_logout",
-            .config_key_command = "command_logout",
-            .icon_urls = {"xdg:system-log-out", ":logout"},
+            .config_key_enabled = u"logout_enabled"_s,
+            .config_key_title = u"title_logout"_s,
+            .config_key_command = u"command_logout"_s,
+            .icon_urls = {u"xdg:system-log-out"_s, u":logout"_s},
             .default_title = tr("Logout"),
             .description = tr("Quit the session"),
             .command = defaultCommand(LOGOUT),
         },
         {
             .id = SUSPEND,
-            .config_key_enabled = "suspend_enabled",
-            .config_key_title = "title_suspend",
-            .config_key_command = "command_suspend",
-            .icon_urls = {"xdg:system-suspend", ":suspend"},
+            .config_key_enabled = u"suspend_enabled"_s,
+            .config_key_title = u"title_suspend"_s,
+            .config_key_command = u"command_suspend"_s,
+            .icon_urls = {u"xdg:system-suspend"_s, u":suspend"_s},
             .default_title = tr("Suspend"),
             .description = tr("Suspend to memory"),
             .command = defaultCommand(SUSPEND),
@@ -134,10 +135,10 @@ Plugin::Plugin():
 #if not defined(Q_OS_MAC)
         {
             .id = HIBERNATE,
-            .config_key_enabled = "hibernate_enabled",
-            .config_key_title = "title_hibernate",
-            .config_key_command = "command_hibernate",
-            .icon_urls = {"xdg:system-suspend-hibernate", ":hibernate"},
+            .config_key_enabled = u"hibernate_enabled"_s,
+            .config_key_title = u"title_hibernate"_s,
+            .config_key_command = u"command_hibernate"_s,
+            .icon_urls = {u"xdg:system-suspend-hibernate"_s, u":hibernate"_s},
             .default_title = tr("Hibernate"),
             .description = tr("Suspend to disk"),
             .command = defaultCommand(HIBERNATE),
@@ -145,20 +146,20 @@ Plugin::Plugin():
 #endif
         {
             .id = REBOOT,
-            .config_key_enabled = "reboot_enabled",
-            .config_key_title = "title_reboot",
-            .config_key_command = "command_reboot",
-            .icon_urls = {"xdg:system-reboot", ":reboot"},
+            .config_key_enabled = u"reboot_enabled"_s,
+            .config_key_title = u"title_reboot"_s,
+            .config_key_command = u"command_reboot"_s,
+            .icon_urls = {u"xdg:system-reboot"_s, u":reboot"_s},
             .default_title = tr("Reboot"),
             .description = tr("Restart the machine"),
             .command = defaultCommand(REBOOT),
         },
         {
             .id = POWEROFF,
-            .config_key_enabled = "poweroff_enabled",
-            .config_key_title = "title_poweroff",
-            .config_key_command = "command_poweroff",
-            .icon_urls = {"xdg:system-shutdown", ":poweroff"},
+            .config_key_enabled = u"poweroff_enabled"_s,
+            .config_key_title = u"title_poweroff"_s,
+            .config_key_command = u"command_poweroff"_s,
+            .icon_urls = {u"xdg:system-shutdown"_s, u":poweroff"_s},
             .default_title = tr("Poweroff"),
             .description = tr("Shut down the machine"),
             .command = defaultCommand(POWEROFF),
@@ -268,7 +269,7 @@ void Plugin::updateIndexItems()
                 {
                     c.default_title, c.description,
                     [this, &c](){ albert::runDetachedProcess({
-                        "/bin/sh", "-c",
+                        u"/bin/sh"_s, u"-c"_s,
                         settings()->value(c.config_key_command, defaultCommand(c.id)).toString()});
                     }
                 }

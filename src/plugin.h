@@ -22,9 +22,9 @@ enum SupportedCommands {
 struct Command
 {
     SupportedCommands id;
-    const char * config_key_enabled;
-    const char * config_key_title;
-    const char * config_key_command;
+    const QString config_key_enabled;
+    const QString config_key_title;
+    const QString config_key_command;
     const QStringList icon_urls;
     const QString default_title;
     const QString description;
