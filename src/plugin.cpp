@@ -5,7 +5,7 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QSettings>
-#include <albert/albert.h>
+#include <albert/systemutil.h>
 #include <albert/extensionregistry.h>
 #include <albert/logging.h>
 #include <albert/standarditem.h>
@@ -268,7 +268,7 @@ void Plugin::updateIndexItems()
             {
                 {
                     c.default_title, c.description,
-                    [this, &c](){ albert::runDetachedProcess({
+                    [this, &c](){ runDetachedProcess({
                         u"/bin/sh"_s, u"-c"_s,
                         settings()->value(c.config_key_command, defaultCommand(c.id)).toString()});
                     }
