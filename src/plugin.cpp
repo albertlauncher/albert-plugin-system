@@ -24,7 +24,7 @@ static QString defaultCommand(SupportedCommands command)
         case SUSPEND:   return uR"(osascript -e 'tell app "System Events" to sleep')"_s;
         case REBOOT:    return uR"(osascript -e 'tell app "System Events" to restart')"_s;
         case POWEROFF:  return uR"(osascript -e 'tell app "System Events" to shut down')"_s;
-    }
+        }
 #elif defined(Q_OS_UNIX)
     for (const QString &de : qEnvironmentVariable("XDG_CURRENT_DESKTOP").split(u':')) {
 
@@ -36,17 +36,17 @@ static QString defaultCommand(SupportedCommands command)
             case HIBERNATE: break ;
             case REBOOT:    return u"gnome-session-quit --reboot --no-prompt"_s;
             case POWEROFF:  return u"gnome-session-quit --power-off --no-prompt"_s;
-        }
+            }
 
         else if (de == u"kde-plasma"_s || de == u"KDE"_s)
             switch (command) {
-            case LOCK:      return u"dbus-send --dest=org.freedesktop.ScreenSaver --type=method_call /ScreenSaver org.freedesktop.ScreenSaver.Lock"_s;
-            case LOGOUT:    return u"qdbus org.kde.Shutdown /Shutdown  org.kde.Shutdown.logout"_s;
+            case LOCK:      return u"dbus-send --type=method_call --dest=org.freedesktop.ScreenSaver /ScreenSaver org.freedesktop.ScreenSaver.Lock"_s;
+            case LOGOUT:    return u"dbus-send --session --type=method_call --dest=org.kde.Shutdown /Shutdown org.kde.Shutdown.logout"_s;
             case SUSPEND:   break ;
             case HIBERNATE: break ;
-            case REBOOT:    return u"qdbus org.kde.Shutdown /Shutdown  org.kde.Shutdown.logoutAndReboot"_s;
-            case POWEROFF:  return u"qdbus org.kde.Shutdown /Shutdown  org.kde.Shutdown.logoutAndShutdown"_s;
-        }
+            case REBOOT:    return u"dbus-send --session --type=method_call --dest=org.kde.Shutdown /Shutdown org.kde.Shutdown.logoutAndReboot"_s;
+            case POWEROFF:  return u"dbus-send --session --type=method_call --dest=org.kde.Shutdown /Shutdown org.kde.Shutdown.logoutAndShutdown"_s;
+            }
 
         else if (de == u"X-Cinnamon"_s || de == u"Cinnamon"_s)
             switch (command) {
@@ -56,7 +56,7 @@ static QString defaultCommand(SupportedCommands command)
             case HIBERNATE: break ;
             case REBOOT:    return u"cinnamon-session-quit --reboot"_s;
             case POWEROFF:  return u"cinnamon-session-quit --power-off"_s;
-        }
+            }
 
         else if (de == u"MATE"_s)
             switch (command) {
@@ -66,7 +66,7 @@ static QString defaultCommand(SupportedCommands command)
             case HIBERNATE: return u"sh -c \"mate-screensaver-command --lock && systemctl hibernate -i\""_s;
             case REBOOT:    return u"mate-session-save --shutdown-dialog"_s;
             case POWEROFF:  return u"mate-session-save --shutdown-dialog"_s;
-        }
+            }
 
         else if (de == u"XFCE"_s)
             switch (command) {
@@ -76,7 +76,7 @@ static QString defaultCommand(SupportedCommands command)
             case HIBERNATE: return u"xfce4-session-logout --hibernate"_s;
             case REBOOT:    return u"xfce4-session-logout --reboot"_s;
             case POWEROFF:  return u"xfce4-session-logout --halt"_s;
-        }
+            }
 
         else if (de == u"LXQt"_s)
             switch (command) {
@@ -86,7 +86,7 @@ static QString defaultCommand(SupportedCommands command)
             case HIBERNATE: return u"lxqt-leave --hibernate"_s;
             case REBOOT:    return u"lxqt-leave --reboot"_s;
             case POWEROFF:  return u"lxqt-leave --shutdown"_s;
-        }
+            }
     }
     switch (command) {
     case LOCK:      return u"xdg-screensaver lock"_s;
