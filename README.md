@@ -1,1 +1,1 @@
-# albert-plugin-system
+# Albert plugin: System
