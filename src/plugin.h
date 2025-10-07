@@ -1,4 +1,4 @@
-// Copyright (c) 2017-2024 Manuel Schneider
+// Copyright (c) 2017-2025 Manuel Schneider
 
 #pragma once
 #include <QStringList>
@@ -6,9 +6,10 @@
 #include <albert/indexqueryhandler.h>
 #include <albert/notification.h>
 #include <albert/property.h>
+#include <array>
 
 
-enum SupportedCommands {
+enum class SupportedCommands {
     LOCK,
     LOGOUT,
     SUSPEND,
@@ -22,13 +23,13 @@ enum SupportedCommands {
 struct Command
 {
     SupportedCommands id;
-    const QString config_key_enabled;
-    const QString config_key_title;
-    const QString config_key_command;
-    const QStringList icon_urls;
-    const QString default_title;
-    const QString description;
-    const QString command;
+    QString config_key_enabled;
+    QString config_key_title;
+    QString config_key_command;
+    QString icon_name;
+    QString default_title;
+    QString description;
+    QString command;
 };
 
 
@@ -44,6 +45,6 @@ public:
     void updateIndexItems() override;
     QWidget* buildConfigWidget() override;
 
-    const std::vector<Command> commands;
+    const std::array<Command, (int)SupportedCommands::POWEROFF + 1> commands;
 
 };

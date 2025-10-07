@@ -5,15 +5,17 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QSettings>
-#include <albert/systemutil.h>
 #include <albert/extensionregistry.h>
+#include <albert/iconutil.h>
 #include <albert/logging.h>
 #include <albert/standarditem.h>
+#include <albert/systemutil.h>
 ALBERT_LOGGING_CATEGORY("system")
 using namespace Qt::StringLiterals;
 using namespace albert::util;
 using namespace albert;
 using namespace std;
+using enum SupportedCommands;
 
 static QString defaultCommand(SupportedCommands command)
 {
@@ -101,75 +103,73 @@ static QString defaultCommand(SupportedCommands command)
 }
 
 Plugin::Plugin():
-    commands{
+    commands({
         {
-            .id = LOCK,
-            .config_key_enabled = u"lock_enabled"_s,
-            .config_key_title = u"title_lock"_s,
-            .config_key_command = u"command_lock"_s,
-            .icon_urls = {u"xdg:system-lock-screen"_s, u":lock"_s},
-            .default_title = tr("Lock"),
-            .description = tr("Lock the session"),
-            .command = defaultCommand(LOCK),
-        },
+         .id = LOCK,
+         .config_key_enabled = u"lock_enabled"_s,
+         .config_key_title = u"title_lock"_s,
+         .config_key_command = u"command_lock"_s,
+         .icon_name = u"system-lock-screen"_s,
+         .default_title = tr("Lock"),
+         .description = tr("Lock the session"),
+         .command = defaultCommand(LOCK),
+         },
         {
-            .id = LOGOUT,
-            .config_key_enabled = u"logout_enabled"_s,
-            .config_key_title = u"title_logout"_s,
-            .config_key_command = u"command_logout"_s,
-            .icon_urls = {u"xdg:system-log-out"_s, u":logout"_s},
-            .default_title = tr("Logout"),
-            .description = tr("Quit the session"),
-            .command = defaultCommand(LOGOUT),
-        },
+         .id = LOGOUT,
+         .config_key_enabled = u"logout_enabled"_s,
+         .config_key_title = u"title_logout"_s,
+         .config_key_command = u"command_logout"_s,
+         .icon_name = u"system-log-out"_s,
+         .default_title = tr("Logout"),
+         .description = tr("Quit the session"),
+         .command = defaultCommand(LOGOUT),
+         },
         {
-            .id = SUSPEND,
-            .config_key_enabled = u"suspend_enabled"_s,
-            .config_key_title = u"title_suspend"_s,
-            .config_key_command = u"command_suspend"_s,
-            .icon_urls = {u"xdg:system-suspend"_s, u":suspend"_s},
-            .default_title = tr("Suspend"),
-            .description = tr("Suspend to memory"),
-            .command = defaultCommand(SUSPEND),
-        },
+         .id = SUSPEND,
+         .config_key_enabled = u"suspend_enabled"_s,
+         .config_key_title = u"title_suspend"_s,
+         .config_key_command = u"command_suspend"_s,
+         .icon_name = u"system-suspend"_s,
+         .default_title = tr("Suspend"),
+         .description = tr("Suspend to memory"),
+         .command = defaultCommand(SUSPEND),
+         },
 #if not defined(Q_OS_MAC)
         {
-            .id = HIBERNATE,
-            .config_key_enabled = u"hibernate_enabled"_s,
-            .config_key_title = u"title_hibernate"_s,
-            .config_key_command = u"command_hibernate"_s,
-            .icon_urls = {u"xdg:system-suspend-hibernate"_s, u":hibernate"_s},
-            .default_title = tr("Hibernate"),
-            .description = tr("Suspend to disk"),
-            .command = defaultCommand(HIBERNATE),
-        },
+         .id = HIBERNATE,
+         .config_key_enabled = u"hibernate_enabled"_s,
+         .config_key_title = u"title_hibernate"_s,
+         .config_key_command = u"command_hibernate"_s,
+         .icon_name = u"system-suspend-hibernate"_s,
+         .default_title = tr("Hibernate"),
+         .description = tr("Suspend to disk"),
+         .command = defaultCommand(HIBERNATE),
+         },
 #endif
         {
-            .id = REBOOT,
-            .config_key_enabled = u"reboot_enabled"_s,
-            .config_key_title = u"title_reboot"_s,
-            .config_key_command = u"command_reboot"_s,
-            .icon_urls = {u"xdg:system-reboot"_s, u":reboot"_s},
-            .default_title = tr("Reboot"),
-            .description = tr("Restart the machine"),
-            .command = defaultCommand(REBOOT),
-        },
+         .id = REBOOT,
+         .config_key_enabled = u"reboot_enabled"_s,
+         .config_key_title = u"title_reboot"_s,
+         .config_key_command = u"command_reboot"_s,
+         .icon_name = u"system-reboot"_s,
+         .default_title = tr("Reboot"),
+         .description = tr("Restart the machine"),
+         .command = defaultCommand(REBOOT),
+         },
         {
-            .id = POWEROFF,
-            .config_key_enabled = u"poweroff_enabled"_s,
-            .config_key_title = u"title_poweroff"_s,
-            .config_key_command = u"command_poweroff"_s,
-            .icon_urls = {u"xdg:system-shutdown"_s, u":poweroff"_s},
-            .default_title = tr("Poweroff"),
-            .description = tr("Shut down the machine"),
-            .command = defaultCommand(POWEROFF),
-        }
-    }
-{
-}
+         .id = POWEROFF,
+         .config_key_enabled = u"poweroff_enabled"_s,
+         .config_key_title = u"title_poweroff"_s,
+         .config_key_command = u"command_poweroff"_s,
+         .icon_name = u"system-shutdown"_s,
+         .default_title = tr("Poweroff"),
+         .description = tr("Shut down the machine"),
+         .command = defaultCommand(POWEROFF),
+         }
+    })
+{}
 
-
-QWidget* Plugin::buildConfigWidget()
+QWidget *Plugin::buildConfigWidget()
 {
     auto *w = new QWidget;
     Ui::ConfigWidget ui;
@@ -188,14 +188,14 @@ QWidget* Plugin::buildConfigWidget()
         bool enabled = s->value(c.config_key_enabled, true).toBool();
 
         checkbox->setCheckState(enabled ? Qt::CheckState::Checked : Qt::CheckState::Unchecked);
-        connect(checkbox, &QCheckBox::clicked, this, [=, this](bool checked)
+        connect(checkbox, &QCheckBox::clicked, this, [=, this, c=&commands[i]](bool checked)
         {
-            settings()->setValue(c.config_key_enabled, checked);
+            settings()->setValue(c->config_key_enabled, checked);
 
             // Restore defaults if unchecked
             if (!checked){
-                settings()->remove(c.config_key_title);
-                settings()->remove(c.config_key_command);
+                settings()->remove(c->config_key_title);
+                settings()->remove(c->config_key_command);
                 line_edit_title->clear();
                 line_edit_command->clear();
             }
@@ -264,7 +264,7 @@ void Plugin::updateIndexItems()
             c.default_title,
             settings()->value(c.config_key_title, c.default_title).toString(),
             c.description,
-            c.icon_urls,
+            [icon_string=c.icon_name]{ return makeThemeIcon(icon_string); },
             {
                 {
                     c.default_title, c.description,
