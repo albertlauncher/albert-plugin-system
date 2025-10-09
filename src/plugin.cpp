@@ -104,7 +104,7 @@ static QString defaultCommand(SupportedCommands command)
 
 Plugin::Plugin():
     commands({
-        {
+        Command{
          .id = LOCK,
          .config_key_enabled = u"lock_enabled"_s,
          .config_key_title = u"title_lock"_s,
@@ -113,8 +113,8 @@ Plugin::Plugin():
          .default_title = tr("Lock"),
          .description = tr("Lock the session"),
          .command = defaultCommand(LOCK),
-         },
-        {
+        },
+        Command{
          .id = LOGOUT,
          .config_key_enabled = u"logout_enabled"_s,
          .config_key_title = u"title_logout"_s,
@@ -123,8 +123,8 @@ Plugin::Plugin():
          .default_title = tr("Logout"),
          .description = tr("Quit the session"),
          .command = defaultCommand(LOGOUT),
-         },
-        {
+        },
+        Command{
          .id = SUSPEND,
          .config_key_enabled = u"suspend_enabled"_s,
          .config_key_title = u"title_suspend"_s,
@@ -133,9 +133,9 @@ Plugin::Plugin():
          .default_title = tr("Suspend"),
          .description = tr("Suspend to memory"),
          .command = defaultCommand(SUSPEND),
-         },
+        },
 #if not defined(Q_OS_MAC)
-        {
+        Command{
          .id = HIBERNATE,
          .config_key_enabled = u"hibernate_enabled"_s,
          .config_key_title = u"title_hibernate"_s,
@@ -144,9 +144,9 @@ Plugin::Plugin():
          .default_title = tr("Hibernate"),
          .description = tr("Suspend to disk"),
          .command = defaultCommand(HIBERNATE),
-         },
+        },
 #endif
-        {
+        Command{
          .id = REBOOT,
          .config_key_enabled = u"reboot_enabled"_s,
          .config_key_title = u"title_reboot"_s,
@@ -155,8 +155,8 @@ Plugin::Plugin():
          .default_title = tr("Reboot"),
          .description = tr("Restart the machine"),
          .command = defaultCommand(REBOOT),
-         },
-        {
+        },
+        Command{
          .id = POWEROFF,
          .config_key_enabled = u"poweroff_enabled"_s,
          .config_key_title = u"title_poweroff"_s,
@@ -165,7 +165,7 @@ Plugin::Plugin():
          .default_title = tr("Poweroff"),
          .description = tr("Shut down the machine"),
          .command = defaultCommand(POWEROFF),
-         }
+        }
     })
 {}
 
