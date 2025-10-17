@@ -12,7 +12,6 @@
 #include <albert/systemutil.h>
 ALBERT_LOGGING_CATEGORY("system")
 using namespace Qt::StringLiterals;
-using namespace albert::util;
 using namespace albert;
 using namespace std;
 using enum SupportedCommands;

@@ -5,7 +5,6 @@
 #include <albert/extensionplugin.h>
 #include <albert/indexqueryhandler.h>
 #include <albert/notification.h>
-#include <albert/property.h>
 #include <array>
 
 
@@ -33,8 +32,8 @@ struct Command
 };
 
 
-class Plugin : public albert::util::ExtensionPlugin,
-               public albert::util::IndexQueryHandler
+class Plugin : public albert::ExtensionPlugin,
+               public albert::IndexQueryHandler
 {
     ALBERT_PLUGIN
 
