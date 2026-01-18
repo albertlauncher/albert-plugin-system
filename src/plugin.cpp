@@ -5,7 +5,6 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QSettings>
-#include <albert/extensionregistry.h>
 #include <albert/iconutil.h>
 #include <albert/logging.h>
 #include <albert/standarditem.h>
