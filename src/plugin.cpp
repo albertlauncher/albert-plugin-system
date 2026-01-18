@@ -5,15 +5,15 @@
 #include <QCheckBox>
 #include <QLineEdit>
 #include <QSettings>
-#include <albert/iconutil.h>
+#include <albert/icon.h>
 #include <albert/logging.h>
 #include <albert/standarditem.h>
 #include <albert/systemutil.h>
 ALBERT_LOGGING_CATEGORY("system")
+using enum SupportedCommands;
 using namespace Qt::StringLiterals;
 using namespace albert;
 using namespace std;
-using enum SupportedCommands;
 
 static QString defaultCommand(SupportedCommands command)
 {
@@ -262,7 +262,7 @@ void Plugin::updateIndexItems()
             c.default_title,
             settings()->value(c.config_key_title, c.default_title).toString(),
             c.description,
-            [icon_string=c.icon_name]{ return makeThemeIcon(icon_string); },
+            [icon_string=c.icon_name]{ return Icon::theme(icon_string); },
             {
                 {
                     c.default_title, c.description,
