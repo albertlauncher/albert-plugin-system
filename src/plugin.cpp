@@ -17,7 +17,7 @@ using namespace std;
 
 static QString defaultCommand(SupportedCommands command)
 {
-#if defined(Q_OS_MAC)
+#if defined(Q_OS_MACOS)
     switch (command) {
         case LOCK:      return uR"(pmset displaysleepnow)"_s;
         case LOGOUT:    return uR"(osascript -e 'tell app "System Events" to log out')"_s;
@@ -132,7 +132,7 @@ Plugin::Plugin():
          .description = tr("Suspend to memory"),
          .command = defaultCommand(SUSPEND),
         },
-#if not defined(Q_OS_MAC)
+#if not defined(Q_OS_MACOS)
         Command{
          .id = HIBERNATE,
          .config_key_enabled = u"hibernate_enabled"_s,

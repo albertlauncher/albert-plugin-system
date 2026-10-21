@@ -12,7 +12,7 @@ enum class SupportedCommands {
     LOCK,
     LOGOUT,
     SUSPEND,
-#if not defined(Q_OS_MAC)
+#if not defined(Q_OS_MACOS)
     HIBERNATE,
 #endif
     REBOOT,
